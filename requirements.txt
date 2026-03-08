@@ -1,2 +1,6 @@
 flask
 google-search-results
+gunicorn
+apscheduler
+requests
+beautifulsoup4
