@@ -6,12 +6,14 @@ import os
 
 app = Flask(__name__)
 
+# Configura o agendador
 scheduler = BackgroundScheduler()
-# Executa todo dia às 03:00 da manhã (horário que costuma ser mais tranquilo)
 scheduler.add_job(func=atualizar_dados, trigger="cron", hour=3, minute=0)
 scheduler.start()
 
-# Rota que o seu app B4A vai chamar
+# Executa uma vez ao iniciar o servidor
+atualizar_dados()
+
 @app.route('/api/precos', methods=['GET'])
 def get_precos():
     if os.path.exists('data.json'):
@@ -19,8 +21,3 @@ def get_precos():
             data = json.load(f)
         return jsonify(data)
     return jsonify({"erro": "Dados não encontrados"}), 404
-
-if __name__ == '__main__':
-    # Executa a primeira busca ao iniciar
-    atualizar_dados()
-    app.run(host='0.0.0.0', port=5000)
