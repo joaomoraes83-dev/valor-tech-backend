@@ -6,15 +6,22 @@ import json
 caminho_arquivo = os.path.join(os.path.dirname(__file__), 'data.json')
 
 def atualizar_dados():
-    # Pega a chave diretamente ou do ambiente do Render
-    # Substituí o erro do seu código pela forma correta de ler a chave
     api_key = os.environ.get("SERPAPI_KEY", "8cbc27214351554eaf8a44e1d86144c7cd63869909c90363c8ff371550ff179f")
-    
-    # Produtos que queremos monitorar
     produtos = ["iPhone 13 128GB", "PlayStation 5"]
     resultados_finais = []
 
-    print("Iniciando busca no Google Shopping...")
+    # 1. Tenta ler os preços antigos para comparar
+    precos_antigos = {}
+    if os.path.exists(caminho_arquivo):
+        try:
+            with open(caminho_arquivo, 'r', encoding='utf-8') as f:
+                dados_velhos = json.load(f)
+                for item in dados_velhos:
+                    # Remove simbolos de moeda para converter em número
+                    p_limpo = item['preco'].replace('$', '').replace(',', '').strip()
+                    precos_antigos[item['nome']] = float(p_limpo)
+        except:
+            pass
 
     for item in produtos:
         params = {
@@ -30,18 +37,32 @@ def atualizar_dados():
             
             if "shopping_results" in results:
                 primeiro = results["shopping_results"][0]
+                nome_prod = primeiro.get("title")
+                preco_texto = primeiro.get("price")
+                
+                # Converte preço atual para número
+                preco_atual = float(preco_texto.replace('$', '').replace(',', '').strip())
+                
+                # 2. Calcula a tendência
+                tendencia = "Estável"
+                if nome_prod in precos_antigos:
+                    v_antigo = precos_antigos[nome_prod]
+                    if preco_atual > v_antigo:
+                        diff = ((preco_atual - v_antigo) / v_antigo) * 100
+                        tendencia = f"+{diff:.1f}%"
+                    elif preco_atual < v_antigo:
+                        diff = ((v_antigo - preco_atual) / v_antigo) * 100
+                        tendencia = f"-{diff:.1f}%"
+
                 info = {
-                    "nome": primeiro.get("title"),
-                    "preco": primeiro.get("price"),
-                    "tendencia": "Consulte o site"
+                    "nome": nome_prod,
+                    "preco": preco_texto,
+                    "tendencia": tendencia
                 }
                 resultados_finais.append(info)
-                print(f"Produto encontrado: {item}")
         except Exception as e:
-            print(f"Erro ao buscar {item}: {e}")
+            print(f"Erro: {e}")
 
-    # AGORA ESTAS LINHAS ESTÃO DENTRO DA FUNÇÃO (ALINHADAS)
     with open(caminho_arquivo, 'w', encoding='utf-8') as f:
         json.dump(resultados_finais, f, ensure_ascii=False)
-    
-    print("Arquivo data.json atualizado com sucesso!")
+
