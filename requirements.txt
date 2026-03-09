@@ -3,4 +3,6 @@ google-search-results
 gunicorn
 apscheduler
 requests
+pymongo
+dnspython
 beautifulsoup4
