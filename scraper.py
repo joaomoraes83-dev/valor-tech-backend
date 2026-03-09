@@ -17,7 +17,18 @@ def atualizar_dados():
     # Chave da SerpApi
     api_key = os.environ.get("SERPAPI_KEY", "8cbc27214351554eaf8a44e1d86144c7cd63869909c90363c8ff371550ff179f")
     
-    produtos = ["iPhone 13 128GB", "PlayStation 5"]
+    produtos = [
+        "iPhone 15 128GB", 
+        "iPhone 13 128GB", 
+        "PlayStation 5 Slim", 
+        "Xbox Series S", 
+        "Samsung Galaxy S23", 
+        "MacBook Air M2", 
+        "Apple Watch Series 9", 
+        "iPad 9ª Geração", 
+        "Kindle 11ª Geração", 
+        "JBL Flip 6"
+    ]
     resultados_finais = []
 
     print(f"Iniciando busca: {datetime.now()}")
@@ -78,5 +89,6 @@ def atualizar_dados():
     with open(caminho_arquivo, 'w', encoding='utf-8') as f:
         json.dump(resultados_finais, f, ensure_ascii=False)
     print("Dados atualizados com sucesso no MongoDB e data.json")
+
 
 
